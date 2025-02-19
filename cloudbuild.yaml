@@ -1,42 +1,31 @@
 steps:
-  # Step 1: Build Docker Image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build Docker Image'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/git123/git_hridhya:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA'
       - '.'
 
-  # Step 2: Push Docker Image to Google Container Registry (GCR)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push Docker Image'
     args:
       - 'push'
-      - 'gcr.io/git123/git_hridhya:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA'
 
-  # Step 3: Authenticate Kubectl with GKE
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'Authenticate Kubectl'
-    args:
-      - 'container'
-      - 'clusters'
-      - 'get-credentials'
-      - 'my-cluster'
-      - '--zone'
-      - 'us-central1-a'
-      - '--project'
-      - 'git123'
-
-  # Step 4: Deploy the Docker Image to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
     id: 'Deploy to GKE'
     args:
       - 'set'
       - 'image'
-      - 'deployment/git-hridhya-deployment'
-      - 'git-hridhya=gcr.io/git123/git_hridhya:$SHORT_SHA'
+      - 'deployment/my-app-deployment'
+      - 'my-app=gcr.io/$PROJECT_ID/my-app:$SHORT_SHA'
       - '--namespace=default'
+      - '--kubeconfig'
+      - '/workspace/.kube/config'
 
 images:
-  - 'gcr.io/git123/git_hridhya:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/my-app:$SHORT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
