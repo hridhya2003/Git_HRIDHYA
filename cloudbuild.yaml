@@ -1,31 +1,25 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build Docker Image'
-    args:
-      - 'build'
-      - '-t'
-      - 'gcr.io/git123/my-app:abc'
-      - '.'
+    args: ['build', '-t', 'gcr.io/git123/my-app:latest', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push Docker Image'
-    args:
-      - 'push'
-      - 'gcr.io/git123/my-app:abc'
+    args: ['push', 'gcr.io/git123/my-app:latest']
 
   - name: 'gcr.io/cloud-builders/kubectl'
     id: 'Deploy to GKE'
+    entrypoint: 'bash'
     args:
-      - 'set'
-      - 'image'
-      - 'deployment/my-app-deployment'
-      - 'my-app=gcr.io/git123/my-app:abc'
-      - '--namespace=default'
-      - '--kubeconfig'
-      - '/workspace/.kube/config'
+      - '-c'
+      - |
+        gcloud container clusters get-credentials my-cluster --zone us-central1-c
+        kubectl set image deployment/my-app-deployment my-app=gcr.io/git123/my-app:latest
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'
 
 images:
-  - 'gcr.io/git123/my-app:abc'
-
+  - 'gcr.io/git123/my-app:latest'
 options:
   logging: CLOUD_LOGGING_ONLY
