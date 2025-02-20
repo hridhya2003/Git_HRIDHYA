@@ -13,7 +13,7 @@ steps:
     args:
       - '-c'
       - |
-        gcloud container clusters get-credentials my-cluster --zone us-central1-c
+        gcloud container clusters get-credentials my-cluster --zone us-central1-a
         kubectl set image deployment/my-app-deployment my-app=gcr.io/git123/my-app:latest
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
